@@ -1,5 +1,4 @@
-from sqlalchemy import Mapped, mapped_column
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 from app.model.base import Base
 
 class Book(Base):

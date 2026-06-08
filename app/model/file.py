@@ -1,5 +1,5 @@
-from sqlalchemy import Mapped, mapped_column, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, Mapped, mapped_column
+from sqlalchemy import ForeignKey
 from app.model.base import Base
 
 class File(Base):
