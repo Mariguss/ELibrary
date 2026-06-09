@@ -2,6 +2,12 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from app.model.base import Base
 
+from typing import TYPE_CHECKING  
+
+if TYPE_CHECKING:
+    from app.model.role import Role
+    from app.model.selection import Selection
+
 class User(Base):
     __tablename__ = "user"
 

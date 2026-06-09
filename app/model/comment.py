@@ -4,6 +4,12 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from app.model.base import Base
 
+from typing import TYPE_CHECKING  
+
+if TYPE_CHECKING:
+    from app.model.user import User
+    from app.model.book import Book
+    
 class Comment(Base):
     __tablename__ = "comment"
 
