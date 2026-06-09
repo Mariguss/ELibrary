@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from app.model.user import User
-    
+
 class Selection(Base):
     __tablename__ = "selection"
 
@@ -15,3 +15,4 @@ class Selection(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
 
     user = relationship("User", back_populates="selections")
+    book_selections = relationship("BookSelection", back_populates="selection")

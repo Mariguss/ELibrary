@@ -20,3 +20,4 @@ class User(Base):
     role_id: Mapped[int] = mapped_column(ForeignKey("role.id"), nullable=False)
 
     role = relationship("Role", back_populates="users")
+    selections = relationship("Selection", back_populates="user")

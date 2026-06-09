@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from app.model.book import Book
     from app.model.selection import Selection
-    
+
 class BookSelection(Base):
     __tablename__ = "book_selection"
     __table_args__ = (

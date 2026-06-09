@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from app.model.user import User
-    
+
 class Role(Base):
     __tablename__ = "role"
 

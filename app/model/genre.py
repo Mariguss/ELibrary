@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from app.model.book import Book
-    
+
 class Genre(Base):
     __tablename__ = "genre"
 
