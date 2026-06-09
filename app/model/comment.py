@@ -2,7 +2,7 @@ from datetime import datetime
 from sqlalchemy import DateTime, func
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
-from app.model.base import Base
+from app.model.base import BaseModel
 
 from typing import TYPE_CHECKING  
 
@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from app.model.user import User
     from app.model.book import Book
     
-class Comment(Base):
+class Comment(BaseModel):
     __tablename__ = "comment"
 
     scale: Mapped[int] = mapped_column(nullable=False)

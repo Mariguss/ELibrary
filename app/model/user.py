@@ -1,6 +1,6 @@
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
-from app.model.base import Base
+from app.model.base import  BaseModel
 
 from typing import TYPE_CHECKING  
 
@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from app.model.role import Role
     from app.model.selection import Selection
 
-class User(Base):
+class User(BaseModel):
     __tablename__ = "user"
 
     login: Mapped[str] = mapped_column(nullable=False, unique=True)

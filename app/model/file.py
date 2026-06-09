@@ -1,13 +1,13 @@
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy import ForeignKey
-from app.model.base import Base
+from app.model.base import BaseModel
 
 from typing import TYPE_CHECKING  
 
 if TYPE_CHECKING:
     from app.model.book import Book
     
-class File(Base):
+class File(BaseModel):
     __tablename__ = "file"
     name: Mapped[str] = mapped_column(nullable=False)
     mime_type: Mapped[str] = mapped_column(nullable=False)

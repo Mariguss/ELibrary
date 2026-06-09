@@ -1,5 +1,5 @@
 from sqlalchemy.orm import relationship, Mapped, mapped_column
-from app.model.base import Base
+from app.model.base import BaseModel
 
 from typing import TYPE_CHECKING  
 
@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from app.model.genre import Genre
     from app.model.bookselection import BookSelection
 
-class Book(Base):
+class Book(BaseModel):
     __tablename__ = "book"
 
     title: Mapped[str] = mapped_column(nullable=False)
