@@ -1,15 +1,14 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.model.base import BaseModel
-from app.model.book import Book
 
 from typing import TYPE_CHECKING  
 
 if TYPE_CHECKING:
-    from app.model.book import Book
+    from app.model.bookgenre import BookGenre
 
 class Genre(BaseModel):
     __tablename__ = "genre"
 
     name: Mapped[str] = mapped_column(nullable=False, unique=True)
 
-    books: Mapped[list["Book"]] = relationship("Book", back_populates="genre") 
+    book_genres = relationship("BookGenre", back_populates="genre")

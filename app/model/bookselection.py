@@ -15,8 +15,8 @@ class BookSelection(BaseModel):
         UniqueConstraint("book_id", "selection_id", name="uix_book_selection"),
     )
 
-    book_id: Mapped[int] = mapped_column(ForeignKey("book.id"), nullable=False)
-    selection_id: Mapped[int] = mapped_column(ForeignKey("selection.id"), nullable=False)
+    book_id: Mapped[int] = mapped_column(ForeignKey("book.id", ondelete="CASCADE"))
+    selection_id: Mapped[int] = mapped_column(ForeignKey("selection.id", ondelete="CASCADE"))
 
     book = relationship("Book", back_populates="book_selections")
     selection = relationship("Selection", back_populates="book_selections")

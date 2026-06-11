@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from app.model.comment import Comment
     from app.model.file import File
-    from app.model.genre import Genre
     from app.model.bookselection import BookSelection
+    from app.model.bookgenre import BookGenre
 
 class Book(BaseModel):
     __tablename__ = "book"
@@ -19,9 +19,10 @@ class Book(BaseModel):
     author: Mapped[str] = mapped_column(nullable=False)
     volume: Mapped[int] = mapped_column(nullable=True)
     
-    genre_id: Mapped[int] = mapped_column(nullable=False)
-
     comments = relationship("Comment", back_populates="book")
     files = relationship("File", back_populates="book")
-    genre = relationship("Genre", back_populates="books")
+    
+    book_genres = relationship("BookGenre", back_populates="book")
     book_selections = relationship("BookSelection", back_populates="book")
+
+

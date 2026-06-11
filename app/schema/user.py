@@ -1,10 +1,11 @@
 from typing import List, Optional
 from pydantic import BaseModel, EmailStr
-from app.schema.base import FindBase, SearchOptions
+from app.schema.base import FindBase
+from app.schema.base import SearchOptions
+
 
 class BaseUser(BaseModel):
     login: str
-    email: EmailStr
     first_name: str 
     last_name: str
     middle_name: str 
@@ -23,12 +24,10 @@ class User(BaseUser):
 
 class FindUser(FindBase):
     login__eq: str | None = None
-    email__eq: str | None = None
 
 
 class UpsertUser(BaseModel):
     login: str | None = None
-    email: EmailStr | None = None
     first_name: str | None = None
     last_name: str | None = None
     middle_name: str | None = None

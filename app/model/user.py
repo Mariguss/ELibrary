@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from app.model.role import Role
     from app.model.selection import Selection
+    from app.model.comment import Comment
 
 class User(BaseModel):
     __tablename__ = "user"
@@ -19,5 +20,8 @@ class User(BaseModel):
     
     role_id: Mapped[int] = mapped_column(ForeignKey("role.id"), nullable=False)
 
+    comments = relationship("Comment", back_populates="user")
     role = relationship("Role", back_populates="users")
     selections = relationship("Selection", back_populates="user")
+
+    eagers = ["role"]  # Репозиторий автоматически сделает joinedload("role")

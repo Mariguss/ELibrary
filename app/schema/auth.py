@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, Field
 
 from app.schema.user import User
 
@@ -8,7 +8,6 @@ from app.schema.user import User
 class SignIn(BaseModel):
     login: str
     password: str
-    email: EmailStr
     first_name: str
     last_name: str
     middle_name: str
@@ -16,16 +15,20 @@ class SignIn(BaseModel):
 
 
 class SignUp(BaseModel):
-    email: EmailStr
-    password: str = Field(..., min_length=6)
     login: str = Field(..., min_length=3, max_length=50)
+    password: str = Field(..., min_length=6)
     first_name: str = Field(..., min_length=2, max_length=100)
     last_name: str = Field(..., min_length=2, max_length=100)
     middle_name: str = Field(..., max_length=100)
     role_id: int = Field(..., ge=1)
 
-class Payload(SignIn):
+class Payload(BaseModel):
     id: int
+    login: str
+    first_name: str
+    last_name: str
+    middle_name: str
+    role_id: int
 
 
 class SignInResponse(BaseModel):
