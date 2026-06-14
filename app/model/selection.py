@@ -12,7 +12,7 @@ class Selection(BaseModel):
 
     name: Mapped[str] = mapped_column(nullable=False)
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
 
     user = relationship("User", back_populates="selections")
     book_selections = relationship("BookSelection", back_populates="selection")

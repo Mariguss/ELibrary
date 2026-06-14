@@ -13,6 +13,6 @@ class File(BaseModel):
     mime_type: Mapped[str] = mapped_column(nullable=False)
     md5_hash: Mapped[str] = mapped_column(nullable=False, unique=True)
 
-    book_id: Mapped[int] = mapped_column(ForeignKey("book.id"), nullable=False)
-
+    book_id: Mapped[int] = mapped_column(ForeignKey("book.id", ondelete="CASCADE"), nullable=False)
+    
     book = relationship("Book", back_populates="files")
