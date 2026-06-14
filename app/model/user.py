@@ -25,3 +25,8 @@ class User(BaseModel):
     selections = relationship("Selection", back_populates="user")
 
     eagers = ["role"]  # Репозиторий автоматически сделает joinedload("role")
+
+    def fio(self) -> str:
+        """Возвращает ФИО пользователя"""
+        fio = f"{self.last_name} {self.first_name} {self.middle_name}"
+        return fio

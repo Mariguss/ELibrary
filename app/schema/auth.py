@@ -20,7 +20,7 @@ class SignUp(BaseModel):
     first_name: str = Field(..., min_length=2, max_length=100)
     last_name: str = Field(..., min_length=2, max_length=100)
     middle_name: str = Field(..., max_length=100)
-    role_id: int = Field(..., ge=1)
+    role_id: int | None = 3
 
 class Payload(BaseModel):
     id: int
