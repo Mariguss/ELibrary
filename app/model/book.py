@@ -1,5 +1,8 @@
 from sqlalchemy.orm import relationship, Mapped, mapped_column
+from sqlalchemy import UniqueConstraint
 from app.model.base import BaseModel
+from datetime import datetime
+from sqlalchemy import DateTime, func
 
 from typing import TYPE_CHECKING  
 
@@ -11,6 +14,9 @@ if TYPE_CHECKING:
 
 class Book(BaseModel):
     __tablename__ = "book"
+    __table_args__ = (
+        UniqueConstraint("title", "author", "year", name="uix_book_title_author_year"),
+    )
 
     title: Mapped[str] = mapped_column(nullable=False)
     description: Mapped[str] = mapped_column(nullable=True)
@@ -18,6 +24,7 @@ class Book(BaseModel):
     publisher: Mapped[str] = mapped_column(nullable=False)
     author: Mapped[str] = mapped_column(nullable=False)
     volume: Mapped[int] = mapped_column(nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     
     comments = relationship("Comment", back_populates="book")
     files = relationship("File", back_populates="book")

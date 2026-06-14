@@ -8,10 +8,10 @@ from app.schema.user import User
 class SignIn(BaseModel):
     login: str
     password: str
-    first_name: str
-    last_name: str
-    middle_name: str
-    role_id: int
+    # first_name: str
+    # last_name: str
+    # middle_name: str
+    # role_id: int
 
 
 class SignUp(BaseModel):

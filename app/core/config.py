@@ -56,7 +56,7 @@ class Configs(BaseSettings):
         return f"{db_engine}://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.ENV_DATABASE_MAPPER[self.ENV]}"
 
     PAGE: int = 1
-    PAGE_SIZE: int = 20
+    PAGE_SIZE: int = 10
     ORDERING: str = "-id"
 
     model_config: SettingsConfigDict = SettingsConfigDict(case_sensitive=True)
