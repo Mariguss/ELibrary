@@ -3,10 +3,14 @@ from dependency_injector import containers, providers
 from app.core.database import db_instance
 from app.repository.user import UserRepository
 from app.repository.role import RoleRepository
+from app.repository.book import BookRepository
+from app.repository.genre import GenreRepository
 
 from app.service.auth import AuthService
 from app.service.user import UserService
 from app.service.role import RoleService
+from app.service.book import BookService
+from app.service.genre import GenreService
 
 
 class Container(containers.DeclarativeContainer):
@@ -15,6 +19,8 @@ class Container(containers.DeclarativeContainer):
             "app.api.v1.endpoints.auth",
             "app.api.v1.endpoints.user",
             "app.api.v1.endpoints.role",
+            "app.api.v1.endpoints.book",
+            "app.api.v1.endpoints.genre",
             "app.core.dependencies",
         ]
     )
@@ -24,9 +30,14 @@ class Container(containers.DeclarativeContainer):
     # Repositories
     user_repository = providers.Factory(UserRepository, session_factory=session_factory)
     role_repository = providers.Factory(RoleRepository, session_factory=session_factory)
+    book_repository = providers.Factory(BookRepository, session_factory=session_factory)
+    genre_repository = providers.Factory(GenreRepository, session_factory=session_factory)
 
     # Services
     user_service = providers.Factory(UserService, repository=user_repository)
     auth_service = providers.Factory(AuthService, repository=user_repository)
     role_service = providers.Factory(RoleService, repository=role_repository)
+    book_service = providers.Factory(BookService, repository=book_repository)
+    genre_service = providers.Factory(GenreService, repository=genre_repository)
+
 

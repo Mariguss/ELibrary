@@ -49,3 +49,8 @@ def get_current_super_user(current_user: User = Depends(get_current_user)) -> Us
     if not current_user.role.name == "admin":  # Предполагаем, что роль с name="admin" - это администратор
         raise AuthError("It's not an admin")
     return current_user
+
+def get_current_editor_user(current_user: User = Depends(get_current_user)) -> User:
+    if current_user.role.name not in ("admin", "moderator"):
+        raise AuthError("Недостаточно прав")
+    return current_user

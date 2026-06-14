@@ -26,10 +26,10 @@ class Book(BaseModel):
     volume: Mapped[int] = mapped_column(nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     
-    comments = relationship("Comment", back_populates="book")
-    files = relationship("File", back_populates="book")
+    comments = relationship("Comment", back_populates="book", passive_deletes=True)
+    files = relationship("File", back_populates="book", passive_deletes=True)
     
-    book_genres = relationship("BookGenre", back_populates="book")
-    book_selections = relationship("BookSelection", back_populates="book")
+    book_genres = relationship("BookGenre", back_populates="book", passive_deletes=True)
+    book_selections = relationship("BookSelection", back_populates="book", passive_deletes=True)
 
 
