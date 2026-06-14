@@ -10,5 +10,6 @@ class Role(BaseModel):
     __tablename__ = "role"
 
     name: Mapped[str] = mapped_column(nullable=False, unique=True)
+    description: Mapped[str] = mapped_column(nullable=True)
 
     users = relationship("User", back_populates="role")

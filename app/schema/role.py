@@ -4,17 +4,19 @@ from typing import Optional, List
 class Role(BaseModel):
     id: int
     name: str
+    description: str
 
 
 class UpsertRole(BaseModel):
-    name: str
+    name: str | None = None
+    description: str | None = None
 
 
 class FindRoleQuery(BaseModel):
-    page: Optional[int] = 1
-    page_size: Optional[str] = "5"
-    ordering: Optional[str] = "id"
-    name__eq: Optional[str] = None
+    page: int | None = 1
+    page_size: str | int | None = 5
+    ordering: str | None = "id"
+    name__eq: str | None = None
 
 # схема для ответа сервера (блок search_options возвращает репозиторий)
 class SearchOptions(BaseModel):
