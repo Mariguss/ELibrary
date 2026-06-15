@@ -7,16 +7,19 @@
 - Администратор
 
 login: admin
+
 password: admin
 
 - Модератор
 
 login: ivan
+
 password: 123456
 
 - Пользователь
 
 login: manhatty
+
 password: 123456
 
 ---
