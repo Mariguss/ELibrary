@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Мои подборки{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Мои подборки</h2>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newSelectionModal">Новая подборка</button>
+</div>
+
+<div id="selections-list" class="row g-3"></div>
+
+<!-- Модальное окно создания подборки -->
+<div class="modal fade" id="newSelectionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Новая подборка</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="new-selection-error" class="alert alert-danger d-none"></div>
+                <div class="mb-3">
+                    <label for="selection-name" class="form-label">Название подборки</label>
+                    <input type="text" class="form-control" id="selection-name" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" id="create-selection-btn">Создать</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+requireRole("user");
+
+async function loadSelections() {
+    const resp = await apiFetch("/api/v1/selection");
+    const data = await resp.json();
+
+    const container = document.getElementById("selections-list");
+    container.innerHTML = "";
+
+    if (data.length === 0) {
+        container.innerHTML = `<p class="text-muted">У вас пока нет подборок.</p>`;
+        return;
+    }
+
+    data.forEach(selection => {
+        container.insertAdjacentHTML("beforeend", `
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">${selection.name}</h5>
+                        <p class="card-text text-muted">Книг: ${selection.book_count}</p>
+                        <a href="/selections/${selection.id}" class="btn btn-outline-primary">Открыть</a>
+                    </div>
+                </div>
+            </div>
+        `);
+    });
+}
+
+document.getElementById("create-selection-btn").addEventListener("click", async () => {
+    const errorBox = document.getElementById("new-selection-error");
+    errorBox.classList.add("d-none");
+
+    const name = document.getElementById("selection-name").value.trim();
+    if (!name) return;
+
+    const resp = await apiFetch("/api/v1/selection", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+    });
+
+    if (!resp.ok) {
+        errorBox.textContent = "Не удалось создать подборку.";
+        errorBox.classList.remove("d-none");
+        return;
+    }
+
+    document.getElementById("selection-name").value = "";
+    bootstrap.Modal.getInstance(document.getElementById("newSelectionModal")).hide();
+    loadSelections();
+});
+
+loadSelections();
+</script>
+{% endblock %}

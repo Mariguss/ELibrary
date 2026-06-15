@@ -34,7 +34,7 @@ class BookListItem(Book):
     genres: List[Genre] = []
     avg_rating: float | None = None
     comments_count: int = 0
-    cover_file_id: int | None = None
+    cover_url: str | None = None
 
 
 class FindBookResult(BaseModel):

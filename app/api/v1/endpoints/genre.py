@@ -9,11 +9,7 @@ from app.schema.genre import FindGenreResult, UpsertGenre, Genre, FindGenreQuery
 from app.service.genre import GenreService
 
 
-router = APIRouter(
-    prefix="/genre", 
-    tags=["genre"], 
-    dependencies=[Depends(JWTBearer())]
-)
+router = APIRouter(prefix="/genre", tags=["genre"])  # убрала dependencies со всего роутера
 
 
 @router.get("", response_model=FindGenreResult)
@@ -21,12 +17,11 @@ router = APIRouter(
 async def get_genre_list(
     find_query: FindGenreQuery = Depends(),
     service: GenreService = Depends(Provide[Container.genre_service]),
-    current_user: User = Depends(get_current_super_user),
 ):
     return service.get_list(find_query)
 
 
-@router.post("", response_model=Genre)
+@router.post("", response_model=Genre, dependencies=[Depends(JWTBearer())])
 @inject
 async def create_genre(
     genre: UpsertGenre,
@@ -36,7 +31,7 @@ async def create_genre(
     return service.add(genre)
 
 
-@router.patch("/{genre_id}", response_model=Genre)
+@router.patch("/{genre_id}", response_model=Genre, dependencies=[Depends(JWTBearer())])
 @inject
 async def update_genre(
     genre_id: int,
@@ -47,8 +42,7 @@ async def update_genre(
     return service.patch(genre_id, genre)
 
 
-
-@router.delete("/{genre_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{genre_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(JWTBearer())])
 @inject
 async def delete_genre(
     genre_id: int,
@@ -56,4 +50,4 @@ async def delete_genre(
     current_user: User = Depends(get_current_super_user),
 ):
     service.remove_by_id(genre_id)
-    return None  # При 204 коде FastAPI сам очистит тело ответа
+    return None

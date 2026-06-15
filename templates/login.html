@@ -1,73 +1,60 @@
 {% extends "base.html" %}
-{% block title %}Вход — SkillNavigator{% endblock %}
-
+{% block title %}Вход — АИС «Электронная библиотека»{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
-  <div class="col-md-5 col-lg-4">
-    <div class="card p-4">
-      <h4 class="mb-4 text-center fw-bold"><i class="bi bi-person-circle me-2"></i>Вход</h4>
-      <div id="error-msg" class="alert alert-danger d-none"></div>
-      <div class="mb-3">
-        <label class="form-label">Логин</label>
-        <input id="login" type="text" class="form-control" placeholder="Введите логин"/>
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Пароль</label>
-        <div class="input-group">
-          <input id="password" type="password" class="form-control" placeholder="Введите пароль"
-                 onkeydown="if(event.key==='Enter') doLogin()"/>
-          <button class="btn btn-outline-secondary" type="button" onclick="togglePwd()">
-            <i class="bi bi-eye" id="eye-icon"></i>
-          </button>
-        </div>
-      </div>
-      <button class="btn btn-primary w-100" onclick="doLogin()">
-        <i class="bi bi-box-arrow-in-right me-1"></i>Войти
-      </button>
-      <hr/>
-      <p class="text-center small mb-0">Нет аккаунта? <a href="/register">Зарегистрироваться</a></p>
+    <div class="col-md-5">
+        <h2 class="mb-4">Вход</h2>
+        <div id="login-error" class="alert alert-danger d-none"></div>
+        <form id="login-form">
+            <div class="mb-3">
+                <label class="form-label">Логин</label>
+                <input type="text" class="form-control" id="login" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Пароль</label>
+                <input type="password" class="form-control" id="password" required>
+            </div>
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="remember" checked>
+                <label class="form-check-label" for="remember">Запомнить меня</label>
+            </div>
+            <button type="submit" class="btn btn-primary">Войти</button>
+        </form>
+        <p class="mt-3 text-center">
+            Нет аккаунта? <a href="/register">Зарегистрироваться</a>
+        </p>
     </div>
-  </div>
 </div>
 {% endblock %}
 
-{% block scripts %}
+{% block extra_scripts %}
 <script>
-function togglePwd() {
-  const f = document.getElementById('password');
-  const i = document.getElementById('eye-icon');
-  if (f.type === 'password') { f.type = 'text'; i.className = 'bi bi-eye-slash'; }
-  else { f.type = 'password'; i.className = 'bi bi-eye'; }
-}
+document.getElementById("login-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const login = document.getElementById("login").value;
+    const password = document.getElementById("password").value;
+    const errorBox = document.getElementById("login-error");
+    errorBox.classList.add("d-none");
 
-async function doLogin() {
-  const login = document.getElementById('login').value.trim();
-  const password = document.getElementById('password').value;
-  const err = document.getElementById('error-msg');
-  err.classList.add('d-none');
-  if (!login || !password) { err.textContent = 'Заполните все поля'; err.classList.remove('d-none'); return; }
-
-  const res = await fetch('/api/v1/auth/sign-in', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ login, password })
-  });
-  const data = await res.json();
-  if (res.ok) {
-    localStorage.setItem('token', data.access_token);
-    // Fetch current user
-    const me = await fetch('/api/v1/auth/me', {
-      headers: { 'Authorization': 'Bearer ' + data.access_token }
+    const resp = await fetch("/api/v1/auth/sign-in", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ login, password }),
     });
-    if (me.ok) {
-      const user = await me.json();
-      localStorage.setItem('user', JSON.stringify(user));
+
+    if (!resp.ok) {
+        errorBox.textContent = "Невозможно аутентифицироваться с указанными логином и паролем";
+        errorBox.classList.remove("d-none");
+        return;
     }
-    window.location.href = '/';
-  } else {
-    err.textContent = data.detail || 'Неверный логин или пароль';
-    err.classList.remove('d-none');
-  }
-}
+
+    const data = await resp.json();
+    const remember = document.getElementById("remember").checked;
+    setAuth(data.access_token, data.user_info, remember);
+
+    const params = new URLSearchParams(window.location.search);
+    const next = params.get("next") || "/";
+    window.location.href = next;
+});
 </script>
 {% endblock %}

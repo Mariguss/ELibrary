@@ -26,7 +26,7 @@ class AuthService(BaseService):
             login__eq=sign_in_info.login
         )
         
-        user_list_result = self.repository.read_by_options(find_user)
+        user_list_result = self.repository.read_by_options(find_user, eager=True)
         users: List[User] = user_list_result["founds"]
         
         if len(users) < 1:
@@ -78,4 +78,5 @@ class AuthService(BaseService):
         
         logger.info(f"New user registration initiated: {db_schema.login}")
         # 4. Передаем в репозиторий схему, содержащую password_hash
-        return self.repository.create(db_schema)
+        created_user = self.repository.create(db_schema)
+        return self.repository.read_by_id(created_user.id, eager=True)

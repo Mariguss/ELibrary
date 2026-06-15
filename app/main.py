@@ -1,9 +1,13 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from starlette.middleware.cors import CORSMiddleware
 
+from app.api.pages import router as pages_router
 from app.api.v1.routes import routers as v1_routers
 from app.core.config import configs
 from app.core.container import Container
+import os
+
 
 def create_app() -> FastAPI:
     container = Container()
@@ -22,11 +26,18 @@ def create_app() -> FastAPI:
             allow_headers=["*"],
         )
 
-    # API endpoints
+    static_dir = os.path.join(configs.PROJECT_ROOT, "static")
+    os.makedirs(static_dir, exist_ok=True)
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+
+    uploads_dir = os.path.join(configs.PROJECT_ROOT, "uploads")
+    os.makedirs(uploads_dir, exist_ok=True)
+    app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
+
     app.include_router(v1_routers, prefix=configs.API_V1_STR)
+    app.include_router(pages_router)
 
     return app
 
-# Для запуска приложения через Uvicorn: uvicorn app.main:app --reload
-# python -m uvicorn app.main:app --reload
+
 app = create_app()

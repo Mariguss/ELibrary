@@ -1,97 +1,74 @@
 {% extends "base.html" %}
-{% block title %}Регистрация — SkillNavigator{% endblock %}
+
+{% block title %}Регистрация{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
-  <div class="col-md-5 col-lg-4">
-    <div class="card p-4">
-      <h4 class="mb-4 text-center fw-bold"><i class="bi bi-person-plus me-2"></i>Регистрация</h4>
-      <div id="error-msg" class="alert alert-danger d-none"></div>
-      <div class="mb-3">
-        <label class="form-label">Логин</label>
-        <input id="login" type="text" class="form-control" placeholder="Минимум 3 символа"/>
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Имя</label>
-        <input id="first-name" type="text" class="form-control"/>
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Фамилия</label>
-        <input id="last-name" type="text" class="form-control"/>
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Отчество</label>
-        <input id="middle-name" type="text" class="form-control"/>
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Пароль</label>
-        <div class="input-group">
-          <input id="password" type="password" class="form-control" placeholder="Минимум 6 символов"/>
-          <button class="btn btn-outline-secondary" type="button" onclick="togglePwd()">
-            <i class="bi bi-eye" id="eye-icon"></i>
-          </button>
-        </div>
-      </div>
-      <button class="btn btn-primary w-100" onclick="doRegister()">
-        <i class="bi bi-person-check me-1"></i>Создать аккаунт
-      </button>
-      <hr/>
-      <p class="text-center small mb-0">Уже есть аккаунт? <a href="/login">Войти</a></p>
+    <div class="col-md-5">
+        <h2 class="mb-4">Регистрация</h2>
+
+        <div id="form-error" class="alert alert-danger d-none"></div>
+
+        <form id="register-form">
+            <div class="mb-3">
+                <label for="last_name" class="form-label">Фамилия</label>
+                <input type="text" class="form-control" id="last_name" required minlength="2" maxlength="100">
+            </div>
+            <div class="mb-3">
+                <label for="first_name" class="form-label">Имя</label>
+                <input type="text" class="form-control" id="first_name" required minlength="2" maxlength="100">
+            </div>
+            <div class="mb-3">
+                <label for="middle_name" class="form-label">Отчество</label>
+                <input type="text" class="form-control" id="middle_name" maxlength="100">
+            </div>
+            <div class="mb-3">
+                <label for="login" class="form-label">Логин</label>
+                <input type="text" class="form-control" id="login" required minlength="3" maxlength="50">
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Пароль</label>
+                <input type="password" class="form-control" id="password" required minlength="6">
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Зарегистрироваться</button>
+        </form>
+
+        <p class="mt-3 text-center">
+            Уже есть аккаунт? <a href="/login">Войти</a>
+        </p>
     </div>
-  </div>
 </div>
 {% endblock %}
 
-{% block scripts %}
+{% block extra_scripts %}
 <script>
-function togglePwd() {
-  const f = document.getElementById('password');
-  const i = document.getElementById('eye-icon');
-  if (f.type === 'password') { f.type = 'text'; i.className = 'bi bi-eye-slash'; }
-  else { f.type = 'password'; i.className = 'bi bi-eye'; }
-}
+document.getElementById("register-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const errorBox = document.getElementById("form-error");
+    errorBox.classList.add("d-none");
 
-async function doRegister() {
-  const login = document.getElementById('login').value.trim();
-  const firstName = document.getElementById('first-name').value.trim();
-  const lastName = document.getElementById('last-name').value.trim();
-  const middleName = document.getElementById('middle-name').value.trim();
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value;
-  const err = document.getElementById('error-msg');
-  err.classList.add('d-none');
+    const body = {
+        login: document.getElementById("login").value,
+        password: document.getElementById("password").value,
+        first_name: document.getElementById("first_name").value,
+        last_name: document.getElementById("last_name").value,
+        middle_name: document.getElementById("middle_name").value,
+    };
 
-  if (!login || !firstName || !lastName || !middleName || !password) {
-    err.textContent = 'Заполните все поля'; err.classList.remove('d-none'); return;
-  }
-
-  const res = await fetch('/api/v1/auth/sign-up', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ login, first_name: firstName, last_name: lastName, middle_name: middleName, email, password })
-  });
-  const data = await res.json();
-  if (res.ok) {
-    showToast('Аккаунт создан! Выполняю вход…');
-    // Auto-login
-    const lr = await fetch('/api/v1/auth/sign-in', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ login, password })
+    const resp = await fetch("/api/v1/auth/sign-up", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
     });
-    if (lr.ok) {
-      const ld = await lr.json();
-      localStorage.setItem('token', ld.access_token);
-      const me = await fetch('/api/v1/auth/me', {
-        headers: { 'Authorization': 'Bearer ' + ld.access_token }
-      });
-      if (me.ok) localStorage.setItem('user', JSON.stringify(await me.json()));
-      window.location.href = '/';
+
+    if (!resp.ok) {
+        const err = await resp.json().catch(() => null);
+        errorBox.textContent = (err && err.detail) ? err.detail : "Не удалось зарегистрироваться. Проверьте корректность введённых данных.";
+        errorBox.classList.remove("d-none");
+        return;
     }
-  } else {
-    err.textContent = data.detail || 'Ошибка регистрации';
-    err.classList.remove('d-none');
-  }
-}
+
+    redirectWithFlash("/login", "Регистрация прошла успешно. Войдите в систему.");
+});
 </script>
 {% endblock %}

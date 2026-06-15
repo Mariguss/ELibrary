@@ -11,6 +11,10 @@ from app.model.comment import Comment
 from app.model.file import File
 from app.repository.base import BaseRepository
 
+import os
+from app.core.config import configs
+
+UPLOAD_DIR = os.path.join(configs.PROJECT_ROOT, "uploads", "covers")
 
 class BookRepository(BaseRepository):
     def __init__(self, session_factory: Callable[..., AbstractContextManager[Session]]):
@@ -28,6 +32,14 @@ class BookRepository(BaseRepository):
             .scalar()
         )
         cover = session.query(File).filter(File.book_id == book.id).first()
+
+        cover_url = None
+        if cover and os.path.exists(UPLOAD_DIR):
+            for fname in os.listdir(UPLOAD_DIR):
+                if fname.startswith(f"{cover.id}."):
+                    cover_url = f"/uploads/covers/{fname}"
+                    break
+
         return {
             "id": book.id,
             "title": book.title,
@@ -39,7 +51,7 @@ class BookRepository(BaseRepository):
             "genres": [bg.genre for bg in book.book_genres],
             "avg_rating": round(avg_rating, 2) if avg_rating is not None else None,
             "comments_count": comments_count or 0,
-            "cover_file_id": cover.id if cover else None,
+            "cover_url": cover_url,
         }
 
     def read_list_with_details(self, page: int = 1, page_size: int = 10, genre_id: int | None = None):

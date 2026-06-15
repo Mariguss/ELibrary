@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Оставить рецензию{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<h2>Оставить рецензию</h2>
+
+<div id="form-error" class="alert alert-danger d-none"></div>
+
+<form id="review-form">
+    <div class="mb-3">
+        <label for="scale" class="form-label">Оценка</label>
+        <select class="form-select" id="scale" name="scale">
+            <option value="5" selected>5 — отлично</option>
+            <option value="4">4 — хорошо</option>
+            <option value="3">3 — удовлетворительно</option>
+            <option value="2">2 — плохо</option>
+            <option value="1">1 — очень плохо</option>
+            <option value="0">0 — ужасно</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label for="text" class="form-label">Текст рецензии (Markdown)</label>
+        <textarea id="text" name="text" rows="6"></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Отправить</button>
+</form>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const BOOK_ID = {{ book_id }};
+
+requireAuth();
+
+const easyMDE = new EasyMDE({ element: document.getElementById("text") });
+
+document.getElementById("review-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const errorBox = document.getElementById("form-error");
+    errorBox.classList.add("d-none");
+
+    const body = {
+        scale: parseInt(document.getElementById("scale").value),
+        text: easyMDE.value(),
+    };
+
+    const resp = await apiFetch(`/api/v1/book/${BOOK_ID}/comment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+    });
+
+    if (!resp.ok) {
+        const err = await resp.json().catch(() => null);
+        errorBox.textContent = (err && err.detail) ? err.detail : "Не удалось сохранить рецензию.";
+        errorBox.classList.remove("d-none");
+        return;
+    }
+
+    redirectWithFlash(`/book/${BOOK_ID}`, "Рецензия успешно добавлена");
+});
+</script>
+{% endblock %}

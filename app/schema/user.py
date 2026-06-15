@@ -18,8 +18,11 @@ class BaseUserWithPassword(BaseUser):
     password_hash: str
 
 
+from app.schema.role import Role as RoleSchema
+
 class User(BaseUser):
     id: int
+    role: RoleSchema
 
 
 class FindUser(FindBase):

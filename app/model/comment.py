@@ -22,3 +22,5 @@ class Comment(BaseModel):
 
     user = relationship("User", back_populates="comments")
     book = relationship("Book", back_populates="comments")
+
+    eagers = ["user"]

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Подборка{% endblock %}
+
+{% block content %}
+<h2 id="selection-name"></h2>
+<div id="books-list" class="row g-3 mt-3"></div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+requireRole("user");
+
+const SELECTION_ID = {{ selection_id }};
+
+function bookCard(book) {
+    const cover = book.cover_url ? book.cover_url : "/static/img/no-cover.png";
+    return `
+        <div class="col-md-3">
+            <div class="card h-100">
+                <img src="${cover}" class="card-img-top" alt="${book.title}">
+                <div class="card-body">
+                    <h6 class="card-title">${book.title}</h6>
+                    <p class="card-text text-muted">${book.author}, ${book.year}</p>
+                    <a href="/book/${book.id}" class="btn btn-sm btn-outline-primary">Открыть</a>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+async function loadSelection() {
+    const resp = await apiFetch(`/api/v1/selection/${SELECTION_ID}`);
+    if (!resp.ok) {
+        redirectWithFlash("/selections", "Подборка не найдена");
+        return;
+    }
+    const data = await resp.json();
+
+    document.getElementById("selection-name").textContent = data.name;
+
+    const container = document.getElementById("books-list");
+    container.innerHTML = "";
+
+    if (data.books.length === 0) {
+        container.innerHTML = `<p class="text-muted">В этой подборке пока нет книг.</p>`;
+        return;
+    }
+
+    data.books.forEach(book => {
+        container.insertAdjacentHTML("beforeend", bookCard(book));
+    });
+}
+
+loadSelection();
+</script>
+{% endblock %}
