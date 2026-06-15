@@ -40,6 +40,17 @@ async def create_comment(
     return service.create(book_id, current_user.id, comment)
 
 
+@router.patch("/comment/{comment_id}", response_model=Comment)
+@inject
+async def update_comment(
+    comment_id: int,
+    comment: UpsertComment,
+    service: CommentService = Depends(Provide[Container.comment_service]),
+    current_user: User = Depends(get_current_user),
+):
+    return service.update(comment_id, comment, current_user)
+
+
 @router.delete("/comment/{comment_id}", status_code=status.HTTP_204_NO_CONTENT)
 @inject
 async def delete_comment(

@@ -33,6 +33,25 @@
         </div>
     </div>
 </div>
+
+<!-- Модальное окно удаления рецензии -->
+<div class="modal fade" id="deleteCommentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Удаление рецензии</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Вы уверены, что хотите удалить эту рецензию?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Нет</button>
+                <button type="button" class="btn btn-danger" id="confirm-delete-comment-btn">Да</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_scripts %}
@@ -94,18 +113,83 @@ async function loadComments() {
     if (comments.length === 0) {
         container.innerHTML = "<p class='text-muted'>Пока нет рецензий.</p>";
     } else {
-        container.innerHTML = comments.map(c => `
-            <div class="card mb-2">
-                <div class="card-body">
-                    <h6 class="card-subtitle mb-1">${fio(c.user)} — оценка: ${c.scale}</h6>
-                    <small class="text-muted">${new Date(c.created_at).toLocaleString("ru-RU")}</small>
-                    <div class="mt-2">${marked.parse(c.text)}</div>
+        const user = getUser();
+        const canModerate = user && (user.role.name === "admin" || user.role.name === "moderator");
+
+        container.innerHTML = comments.map(c => {
+            const isOwner = user && user.id === c.user_id;
+            let actions = "";
+            if (canModerate || isOwner) {
+                actions += `<button class="btn btn-sm btn-outline-secondary me-1" onclick='editComment(${c.id}, ${c.scale}, ${JSON.stringify(c.text)})'>Редактировать</button>`;
+            }
+            if (canModerate) {
+                actions += `<button class="btn btn-sm btn-outline-danger" onclick="deleteComment(${c.id})">Удалить</button>`;
+            }
+
+            return `
+                <div class="card mb-2" id="comment-${c.id}">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <h6 class="card-subtitle mb-1">${fio(c.user)} — оценка: ${c.scale}</h6>
+                            <div>${actions}</div>
+                        </div>
+                        <small class="text-muted">${new Date(c.created_at).toLocaleString("ru-RU")}</small>
+                        <div class="mt-2">${marked.parse(c.text)}</div>
+                    </div>
                 </div>
-            </div>
-        `).join("");
+            `;
+        }).join("");
     }
 
     await renderReviewAction();
+}
+
+let commentToDelete = null;
+
+function deleteComment(commentId) {
+    commentToDelete = commentId;
+    new bootstrap.Modal(document.getElementById("deleteCommentModal")).show();
+}
+
+document.getElementById("confirm-delete-comment-btn").addEventListener("click", async () => {
+    const resp = await apiFetch(`/api/v1/comment/${commentToDelete}`, { method: "DELETE" });
+    bootstrap.Modal.getInstance(document.getElementById("deleteCommentModal")).hide();
+    if (resp.ok) {
+        loadComments();
+    } else {
+        alert("Не удалось удалить рецензию");
+    }
+});
+
+function editComment(commentId, currentScale, currentText) {
+    const card = document.getElementById(`comment-${commentId}`);
+    card.querySelector(".card-body").innerHTML = `
+        <div class="mb-2">
+            <select class="form-select form-select-sm" id="edit-scale-${commentId}">
+                ${[5,4,3,2,1,0].map(v => `<option value="${v}" ${v === currentScale ? "selected" : ""}>${RATING_LABELS[v]}</option>`).join("")}
+            </select>
+        </div>
+        <textarea class="form-control mb-2" id="edit-text-${commentId}" rows="4">${currentText}</textarea>
+        <button class="btn btn-sm btn-primary me-1" onclick="saveComment(${commentId})">Сохранить</button>
+        <button class="btn btn-sm btn-secondary" onclick="loadComments()">Отмена</button>
+    `;
+}
+
+async function saveComment(commentId) {
+    const scale = parseInt(document.getElementById(`edit-scale-${commentId}`).value);
+    const text = document.getElementById(`edit-text-${commentId}`).value;
+
+    const resp = await apiFetch(`/api/v1/comment/${commentId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scale, text }),
+    });
+
+    if (resp.ok) {
+        loadComments();
+    } else {
+        alert("Не удалось сохранить изменения");
+    }
 }
 
 async function renderReviewAction() {

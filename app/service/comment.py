@@ -41,6 +41,15 @@ class CommentService(BaseService):
 
         return self.repository.read_by_id_with_user(comment_id)
 
+    def update(self, comment_id: int, schema: UpsertComment, current_user):
+        comment = self.repository.read_by_id(comment_id)
+        if current_user.role.name not in ("admin", "moderator") and comment.user_id != current_user.id:
+            raise NotFoundError(detail="not found")
+
+        sanitized = UpsertComment(scale=schema.scale, text=sanitize_html(schema.text))
+        self.repository.update(comment_id, sanitized)
+        return self.repository.read_by_id_with_user(comment_id)
+    
     def remove(self, comment_id: int, current_user):
         comment = self.repository.read_by_id(comment_id)
         if current_user.role.name not in ("admin", "moderator") and comment.user_id != current_user.id:
